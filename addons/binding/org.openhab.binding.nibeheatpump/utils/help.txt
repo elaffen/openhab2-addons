@@ -7,7 +7,7 @@ awk -f channel-types.awk F1X45_utf8.csv > F1X45.xml
 Command to create all channels from CSV file:
 awk -f channels.awk F1X45_utf8.csv > F1X45-all-channels.xml
 
-Command to create ddicated channels from CSV file:
+Command to create dedicated channels from CSV file:
 awk -f sensor_channels.awk F1X45_utf8.csv > F1X45-sensor-channels.xml
 awk -f settings_channels.awk F1X45_utf8.csv > F1X45-settings-channels.xml
 
