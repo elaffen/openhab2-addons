@@ -22,3 +22,4 @@ Import-Package:
 Service-Component: OSGI-INF/*.xml
 Export-Package: org.openhab.binding.nibeheatpump,
  org.openhab.binding.nibeheatpump.handler
+Bundle-ActivationPolicy: lazy
