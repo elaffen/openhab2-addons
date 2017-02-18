@@ -16,7 +16,8 @@ import org.openhab.binding.nibeheatpump.internal.models.VariableInformation.Nibe
 import org.openhab.binding.nibeheatpump.internal.models.VariableInformation.Type;
 
 /**
- * Class for
+ * Class which define all data variables of F1x45 heat pumps.
+ *
  *
  * @author Pauli Anttila - Initial contribution
  */

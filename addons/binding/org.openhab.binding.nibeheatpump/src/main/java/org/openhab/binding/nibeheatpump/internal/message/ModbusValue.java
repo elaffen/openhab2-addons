@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.nibeheatpump.internal.message;
 
+/**
+ * The {@link ModbusValue} define class for Modbus values of the Nibe communication.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public class ModbusValue {
 
     private int coilAddress;

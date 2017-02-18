@@ -14,6 +14,11 @@ import java.util.List;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.protocol.NibeHeatPumpProtocol;
 
+/**
+ * The {@link ModbusDataReadOutMessage} implements Nibe data read out message.
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public class ModbusDataReadOutMessage extends NibeHeatPumpBaseMessage {
 
     List<ModbusValue> values;

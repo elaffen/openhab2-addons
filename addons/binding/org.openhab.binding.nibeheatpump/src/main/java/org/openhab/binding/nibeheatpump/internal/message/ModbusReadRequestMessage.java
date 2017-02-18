@@ -11,6 +11,11 @@ package org.openhab.binding.nibeheatpump.internal.message;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.protocol.NibeHeatPumpProtocol;
 
+/**
+ * The {@link ModbusReadRequestMessage} implements Nibe read request message.
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public class ModbusReadRequestMessage extends NibeHeatPumpBaseMessage {
 
     private int coilAddress;

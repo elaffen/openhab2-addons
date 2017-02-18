@@ -12,6 +12,12 @@ import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.message.NibeHeatPumpBaseMessage.MessageType;
 import org.openhab.binding.nibeheatpump.internal.protocol.NibeHeatPumpProtocol;
 
+/**
+ * The {@link MessageFactory} implements factory class to create Nibe protocol messages.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public class MessageFactory {
 
     public static NibeHeatPumpMessage getMessage(byte[] message) throws NibeHeatPumpException {
