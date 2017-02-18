@@ -22,6 +22,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.io.IOUtils;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.config.NibeHeatPumpConfiguration;
+import org.openhab.binding.nibeheatpump.internal.message.MessageFactory;
 import org.openhab.binding.nibeheatpump.internal.message.ModbusReadRequestMessage;
 import org.openhab.binding.nibeheatpump.internal.message.ModbusWriteRequestMessage;
 import org.openhab.binding.nibeheatpump.internal.message.NibeHeatPumpMessage;
@@ -76,7 +77,7 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
             CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);
 
             serialPort = (SerialPort) commPort;
-            serialPort.setSerialPortParams(38400, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+            serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
             serialPort.enableReceiveThreshold(1);
             serialPort.disableReceiveTimeout();
@@ -93,7 +94,7 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
         } catch (PortInUseException e) {
             throw new NibeHeatPumpException("Connection failed, port in use", e);
         } catch (UnsupportedCommOperationException | IOException e) {
-            throw new NibeHeatPumpException("Connection failed, reason: " + e.getMessage(), e);
+            throw new NibeHeatPumpException("Connection failed, reason: {}" + e.getMessage(), e);
         }
 
         readQueue.clear();
@@ -108,6 +109,8 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
     public void disconnect() throws NibeHeatPumpException {
 
         logger.debug("Disconnecting");
+
+        serialPort.removeEventListener();
 
         if (readerThread != null) {
             logger.debug("Interrupt serial listener");
@@ -138,19 +141,17 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
 
     @Override
     public void sendDatagram(NibeHeatPumpMessage msg) throws NibeHeatPumpException {
-        logger.debug("Sending request: {}", msg.toHexString());
+        logger.trace("Add request to queue: {}", msg.toHexString());
 
         if (msg instanceof ModbusWriteRequestMessage) {
             writeQueue.add(msg.decodeMessage());
-            logger.debug("Write queue: {} messages", writeQueue.size());
         } else if (msg instanceof ModbusReadRequestMessage) {
             readQueue.add(msg.decodeMessage());
-            logger.debug("Read queue: {} messages", readQueue.size());
         } else {
-            logger.debug("Ignore PDU: {}", msg.getClass().toString());
+            logger.trace("Ignore PDU: {}", msg.getClass().toString());
         }
 
-        logger.debug("Read queue: {}, Write queue: {}", readQueue.size(), writeQueue.size());
+        logger.trace("Read queue: {}, Write queue: {}", readQueue.size(), writeQueue.size());
     }
 
     public class SerialReader extends Thread implements SerialPortEventListener {
@@ -206,8 +207,8 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
                 @Override
                 public void sendWriteMsg() {
                     try {
-                        if (!readQueue.isEmpty()) {
-                            sendDataToNibe(readQueue.remove(0));
+                        if (!writeQueue.isEmpty()) {
+                            sendDataToNibe(writeQueue.remove(0));
                         } else {
                             // no messages to send, send ack to pump
                             byte addr = msg().get(NibeHeatPumpProtocol.OFFSET_ADR);
@@ -235,12 +236,16 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
 
                 @Override
                 public void log(String format) {
-                    logger.trace(format);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(format);
+                    }
                 }
 
                 @Override
                 public void log(String format, Object... arg) {
-                    logger.trace(format, arg);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(format, arg);
+                    }
                 }
             };
 
@@ -249,13 +254,18 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
                     final byte[] data = getAllAvailableBytes(in);
                     if (data != null) {
                         context.buffer().put(data);
+
+                        // flip buffer for reading
+                        context.buffer().flip();
                     }
                 } catch (InterruptedIOException e) {
                     Thread.currentThread().interrupt();
-                    logger.error("Interrupted via InterruptedIOException");
+                    logger.debug("Interrupted via InterruptedIOException");
                 } catch (IOException e) {
                     logger.error("Reading from serial port failed", e);
                     sendErrorToListeners(e.getMessage());
+                } catch (Exception e) {
+                    logger.debug("Error occured during serial port read, reason: {}", e.getMessage());
                 }
 
                 // run state machine to process all received data
@@ -264,9 +274,11 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
                         break;
                     }
                 }
+
+                // all bytes should be handled, clear buffer for next round
+                context.buffer().clear();
             }
 
-            serialPort.removeEventListener();
             logger.debug("Data listener stopped");
         }
 
@@ -279,11 +291,12 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
                 byte d[] = new byte[] { (byte) b };
                 os.write(d);
 
-                // read rest available bytes
-                byte[] buffer = new byte[100];
+                // read rest of the available bytes
+                final int bufferLen = 100;
+                byte[] buffer = new byte[bufferLen];
                 int available = in.available();
                 if (available > 0) {
-                    int len = in.read(buffer, 0, available);
+                    int len = in.read(buffer, 0, bufferLen);
                     if (len > -1) {
                         os.write(buffer, 0, len);
                     }
@@ -312,7 +325,7 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
 
     @SuppressWarnings("unused")
     private void sendNakToNibe() throws IOException {
-        logger.debug("Send Nak");
+        logger.trace("Send data (len=1): 15");
         out.write(0x15);
         out.flush();
     }
@@ -337,13 +350,21 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
     }
 
     private void sendAckToNibe() throws IOException {
-        logger.debug("Send Ack");
+        logger.trace("Send data (len=1): 06");
         out.write(0x06);
         out.flush();
     }
 
     private void sendDataToNibe(byte[] data) throws IOException {
-        logger.trace("Sending data (len={}): {}", data.length, DatatypeConverter.printHexBinary(data));
+        if (logger.isTraceEnabled()) {
+            try {
+                NibeHeatPumpMessage msg = MessageFactory.getMessage(data);
+                logger.trace("Sending msg: {}", msg.toString());
+            } catch (NibeHeatPumpException e) {
+                // do nothing
+            }
+            logger.trace("Sending data (len={}): {}", data.length, DatatypeConverter.printHexBinary(data));
+        }
         out.write(data);
         out.flush();
     }

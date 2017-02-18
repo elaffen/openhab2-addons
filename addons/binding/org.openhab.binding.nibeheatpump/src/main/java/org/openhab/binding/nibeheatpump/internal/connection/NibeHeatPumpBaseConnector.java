@@ -46,18 +46,20 @@ public abstract class NibeHeatPumpBaseConnector implements NibeHeatPumpConnector
             NibeHeatPumpMessage msg = MessageFactory.getMessage(data);
             sendMsgToListeners(msg);
         } catch (NibeHeatPumpException e) {
-            logger.error("Invalid message received, exception {}", e.getMessage());
+            logger.debug("Invalid message received, exception {}", e.getMessage());
         }
     }
 
     public void sendMsgToListeners(NibeHeatPumpMessage msg) {
-        try {
-            Iterator<NibeHeatPumpEventListener> iterator = listeners.iterator();
-            while (iterator.hasNext()) {
-                iterator.next().msgReceived(msg);
+        if (msg != null) {
+            try {
+                Iterator<NibeHeatPumpEventListener> iterator = listeners.iterator();
+                while (iterator.hasNext()) {
+                    iterator.next().msgReceived(msg);
+                }
+            } catch (Exception e) {
+                logger.error("Event listener invoking error, exception {}", e.getMessage());
             }
-        } catch (Exception e) {
-            logger.error("Event listener invoking error, exception {}", e.getMessage());
         }
     }
 

@@ -128,8 +128,6 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                 ModbusWriteRequestMessage msg = new ModbusWriteRequestMessage.MessageBuilder().coilAddress(coilAddress)
                         .value(value).build();
 
-                logger.debug("Sending message: {}", msg.toString());
-
                 try {
                     writeResult = sendMessageToNibe(msg);
                     ModbusWriteResponseMessage result = (ModbusWriteResponseMessage) writeResult.get(timeout,
@@ -207,9 +205,8 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
      */
     @Override
     public void initialize() {
-        configuration = getConfigAs(NibeHeatPumpConfiguration.class);
-
         logger.debug("Initialized Nibe Heat Pump device handler for {}", getThing().getUID());
+        configuration = getConfigAs(NibeHeatPumpConfiguration.class);
         logger.info("Using configuration: {}", configuration.toString());
 
         try {
@@ -265,7 +262,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
             }
         } else {
-            logger.debug("Connecting to heat pump already open");
+            logger.debug("Connection to heat pump already open");
         }
     }
 
@@ -273,16 +270,22 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
     public void dispose() {
         logger.debug("Thing {} disposed.", getThing().getUID());
 
-        closeConnection();
-
         if (connectorTask != null && !connectorTask.isCancelled()) {
             connectorTask.cancel(true);
             connectorTask = null;
         }
+
+        closeConnection();
     }
 
     private void closeConnection() {
         logger.debug("Closing connection to the heat pump");
+
+        if (pollingJob != null && !pollingJob.isCancelled()) {
+            pollingJob.cancel(true);
+            pollingJob = null;
+        }
+
         if (connector != null) {
             connector.removeEventListener(this);
             try {
@@ -291,11 +294,6 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                 logger.error("Error occured when disconnecting form heat pump, exception {}", e.getMessage());
             }
         }
-
-        if (pollingJob != null && !pollingJob.isCancelled()) {
-            pollingJob.cancel(true);
-            pollingJob = null;
-        }
     }
 
     private Runnable pollingRunnable = new Runnable() {
@@ -303,7 +301,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         public void run() {
 
             if (configuration.enableReadCommands == false) {
-                logger.debug("All read commands denied, skip polling!");
+                logger.trace("All read commands denied, skip polling!");
                 return;
             }
 
@@ -313,7 +311,8 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
             }
 
             for (int item : items) {
-                if (connector != null && connector.isConnected()) {
+                if (connector != null && connector.isConnected()
+                        && getThing().getStatusInfo().getStatus() == ThingStatus.ONLINE) { // TODO
 
                     CacheObject oldValue = stateMap.get(item);
                     if (oldValue == null
@@ -321,7 +320,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                                     / 1000) {
 
                         // it's time to refresh data
-                        logger.debug("Query coil address '{}'", item);
+                        logger.debug("Time to refresh variable '{}' data", item);
 
                         ModbusReadRequestMessage msg = new ModbusReadRequestMessage.MessageBuilder().coilAddress(item)
                                 .build();
@@ -346,11 +345,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                         } finally {
                             readResult = null;
                         }
-                    } else {
-                        logger.trace("Skip query to coil address '{}'", item);
                     }
-                } else {
-                    logger.warn("No connection to heat pump");
                 }
             }
         }
@@ -406,25 +401,38 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
 
     private synchronized NibeHeatPumpCommandResult sendMessageToNibe(NibeHeatPumpMessage msg)
             throws NibeHeatPumpException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Sending message: {}", msg.toString());
+        }
         connector.sendDatagram(msg);
         return new NibeHeatPumpCommandResult();
     }
 
     @Override
     public void msgReceived(NibeHeatPumpMessage msg) {
-        logger.debug("Received raw data: {}", msg.toHexString());
-        logger.debug("Received message: {}", msg.toString());
+        try {
 
-        updateStatus(ThingStatus.ONLINE);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Received raw data: {}", msg.toHexString());
+            }
 
-        if (msg instanceof ModbusReadResponseMessage) {
-            handleReadResponseMessage((ModbusReadResponseMessage) msg);
-        } else if (msg instanceof ModbusWriteResponseMessage) {
-            handleWriteResponseMessage((ModbusWriteResponseMessage) msg);
-        } else if (msg instanceof ModbusDataReadOutMessage) {
-            handleDataReadOutMessage((ModbusDataReadOutMessage) msg);
-        } else {
-            logger.debug("Received unknow message: {}", msg.toString());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Received message: {}", msg.toString());
+            }
+
+            updateStatus(ThingStatus.ONLINE);
+
+            if (msg instanceof ModbusReadResponseMessage) {
+                handleReadResponseMessage((ModbusReadResponseMessage) msg);
+            } else if (msg instanceof ModbusWriteResponseMessage) {
+                handleWriteResponseMessage((ModbusWriteResponseMessage) msg);
+            } else if (msg instanceof ModbusDataReadOutMessage) {
+                handleDataReadOutMessage((ModbusDataReadOutMessage) msg);
+            } else {
+                logger.debug("Received unknow message: {}", msg.toString());
+            }
+        } catch (Exception e) {
+            logger.debug("Error occured when parsing recevied message, reason: {}", e.getMessage());
         }
     }
 
@@ -436,22 +444,18 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
     }
 
     private void handleReadResponseMessage(ModbusReadResponseMessage msg) {
-        logger.debug("Read response received");
         if (readResult != null) {
             readResult.set(msg);
         }
     }
 
     private void handleWriteResponseMessage(ModbusWriteResponseMessage msg) {
-        logger.debug("Write response received");
         if (writeResult != null) {
             writeResult.set(msg);
         }
     }
 
     private void handleDataReadOutMessage(ModbusDataReadOutMessage msg) {
-        logger.debug("Data readout received");
-
         List<ModbusValue> regValues = msg.getValues();
 
         if (regValues != null) {
@@ -467,10 +471,8 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
 
         VariableInformation variableInfo = VariableInformation.getVariableInfo(pumpModel, coilAddress);
 
-        if (variableInfo == null) {
-            logger.debug("Unknown variable {}", coilAddress);
-        } else {
-            logger.debug("Usig variable information to coil address {}: {}", coilAddress, variableInfo);
+        if (variableInfo != null) {
+            logger.trace("Using variable information to coil address {}: {}", coilAddress, variableInfo);
 
             double val = (double) value.getValue() / (double) variableInfo.factor;
             logger.debug("{} = {}", coilAddress + ":" + variableInfo.variable, val);
@@ -486,10 +488,12 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                 final String channelId = channelPrefix + String.valueOf(coilAddress);
                 final String acceptedItemType = thing.getChannel(channelId).getAcceptedItemType();
 
-                logger.debug("AcceptedItemType for channel {} = {}", channelId, acceptedItemType);
+                logger.trace("AcceptedItemType for channel {} = {}", channelId, acceptedItemType);
                 State state = convertNibeValueToState(variableInfo.dataType, val, acceptedItemType);
                 updateState(new ChannelUID(getThing().getUID(), channelId), state);
             }
+        } else {
+            logger.debug("Unknown variable {}", coilAddress);
         }
     }
 }

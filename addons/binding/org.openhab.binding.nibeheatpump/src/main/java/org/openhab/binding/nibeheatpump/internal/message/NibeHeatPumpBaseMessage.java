@@ -15,6 +15,15 @@ import org.openhab.binding.nibeheatpump.internal.protocol.NibeHeatPumpProtocol;
 
 public abstract class NibeHeatPumpBaseMessage implements NibeHeatPumpMessage {
 
+    public static MessageType getMessageType(byte messageType) {
+        for (MessageType p : MessageType.values()) {
+            if (p.toByte() == messageType) {
+                return p;
+            }
+        }
+        return MessageType.UNKNOWN;
+    }
+
     public enum MessageType {
         MODBUS_DATA_READ_OUT_MSG(NibeHeatPumpProtocol.CMD_MODBUS_DATA_MSG),
         MODBUS_READ_REQUEST_MSG(NibeHeatPumpProtocol.CMD_MODBUS_READ_REQ),
@@ -56,16 +65,10 @@ public abstract class NibeHeatPumpBaseMessage implements NibeHeatPumpMessage {
     public void encodeMessage(byte[] data) throws NibeHeatPumpException {
         data = NibeHeatPumpProtocol.checkMessageChecksumAndRemoveDoubles(data);
         rawMessage = data;
-
-        msgType = MessageType.UNKNOWN;
         msgId = data[1];
 
-        for (MessageType pt : MessageType.values()) {
-            if (pt.toByte() == data[NibeHeatPumpProtocol.OFFSET_CMD]) {
-                msgType = pt;
-                break;
-            }
-        }
+        byte messageTypeByte = NibeHeatPumpProtocol.getMessageType(data);
+        msgType = NibeHeatPumpBaseMessage.getMessageType(messageTypeByte);
     }
 
     @Override

@@ -138,6 +138,18 @@ public class NibeHeatPumpProtocol {
         return checksum;
     }
 
+    public static byte getMessageType(byte[] data) {
+        byte messageType = 0;
+
+        if (data[NibeHeatPumpProtocol.OFFSET_START] == NibeHeatPumpProtocol.FRAME_START_CHAR_FROM_NIBE) {
+            messageType = data[NibeHeatPumpProtocol.OFFSET_CMD];
+        } else if (data[NibeHeatPumpProtocol.OFFSET_START] == NibeHeatPumpProtocol.FRAME_START_CHAR_TO_NIBE) {
+            messageType = data[1];
+        }
+
+        return messageType;
+    }
+
     /*
      * public static byte[] createModbus40ReadPdu(int coildAddress) {
      *

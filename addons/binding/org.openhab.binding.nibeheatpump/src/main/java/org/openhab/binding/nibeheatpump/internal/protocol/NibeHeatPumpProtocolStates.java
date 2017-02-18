@@ -10,6 +10,8 @@ package org.openhab.binding.nibeheatpump.internal.protocol;
 
 import java.nio.ByteBuffer;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 
 public enum NibeHeatPumpProtocolStates implements NibeHeatPumpProtocolState {
@@ -19,7 +21,7 @@ public enum NibeHeatPumpProtocolStates implements NibeHeatPumpProtocolState {
         public boolean process(NibeHeatPumpProtocolContext context) {
             if (context.buffer().hasRemaining()) {
                 byte b = context.buffer().get();
-                context.log("Received byte: {}", b);
+                context.log("Received byte: {}", String.format("%02X", b));
                 if (b == NibeHeatPumpProtocol.FRAME_START_CHAR_FROM_NIBE) {
                     context.log("Frame start found");
                     context.msg().clear();
@@ -39,7 +41,9 @@ public enum NibeHeatPumpProtocolStates implements NibeHeatPumpProtocolState {
                     context.log("Too long message received, rewait start char");
                     context.state(WAIT_START);
                 } else {
-                    context.msg().put(context.buffer().get());
+                    byte b = context.buffer().get();
+                    context.log("Received byte: {}", String.format("%02X", b));
+                    context.msg().put(b);
 
                     try {
                         msgStatus status = checkNibeMessage(context.msg().asReadOnlyBuffer());
@@ -67,10 +71,10 @@ public enum NibeHeatPumpProtocolStates implements NibeHeatPumpProtocolState {
     OK_MESSAGE_RECEIVED {
         @Override
         public boolean process(NibeHeatPumpProtocolContext context) {
-            context.log("OK message received");
             context.msg().flip();
             byte[] data = new byte[context.msg().remaining()];
             context.msg().get(data, 0, data.length);
+            context.log("Received data (len={}): {}", data.length, DatatypeConverter.printHexBinary(data));
             if (NibeHeatPumpProtocol.isModbus40ReadTokenPdu(data)) {
                 context.state(READ_TOKEN_RECEIVED);
             } else if (NibeHeatPumpProtocol.isModbus40WriteTokenPdu(data)) {

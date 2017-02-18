@@ -18,17 +18,8 @@ public class MessageFactory {
 
         if (message != null) {
 
-            byte messageTypeByte;
-
-            if (message[NibeHeatPumpProtocol.OFFSET_START] == NibeHeatPumpProtocol.FRAME_START_CHAR_FROM_NIBE) {
-                messageTypeByte = message[NibeHeatPumpProtocol.OFFSET_CMD];
-            } else if (message[NibeHeatPumpProtocol.OFFSET_START] == NibeHeatPumpProtocol.FRAME_START_CHAR_TO_NIBE) {
-                messageTypeByte = message[1];
-            } else {
-                throw new NibeHeatPumpException("Message not implemented");
-            }
-
-            MessageType messageType = getMessageType(messageTypeByte);
+            byte messageTypeByte = NibeHeatPumpProtocol.getMessageType(message);
+            MessageType messageType = NibeHeatPumpBaseMessage.getMessageType(messageTypeByte);
 
             switch (messageType) {
                 case MODBUS_DATA_READ_OUT_MSG:
@@ -45,18 +36,9 @@ public class MessageFactory {
                     break;
             }
 
-            throw new NibeHeatPumpException("Message not implemented");
+            return null;
         }
 
         throw new NibeHeatPumpException("Illegal message (null)");
-    }
-
-    private static MessageType getMessageType(byte messageType) {
-        for (MessageType p : MessageType.values()) {
-            if (p.toByte() == messageType) {
-                return p;
-            }
-        }
-        return MessageType.UNKNOWN;
     }
 }
