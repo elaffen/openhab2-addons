@@ -18,6 +18,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.openhab.binding.nibeheatpump.internal.message.NibeHeatPumpMessage;
 
+/**
+ * The {@link NibeHeatPumpCommandResult} implements a very simple {@link Future} for {@link NibeHeatPumpMessage}s.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public class NibeHeatPumpCommandResult implements Future<NibeHeatPumpMessage> {
 
     private final Lock lock = new ReentrantLock();

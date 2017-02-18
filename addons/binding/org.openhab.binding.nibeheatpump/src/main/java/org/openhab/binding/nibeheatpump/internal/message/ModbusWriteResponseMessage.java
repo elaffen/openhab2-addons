@@ -11,6 +11,12 @@ package org.openhab.binding.nibeheatpump.internal.message;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.protocol.NibeHeatPumpProtocol;
 
+/**
+ * The {@link ModbusWriteResponseMessage} implements Nibe write response message.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public class ModbusWriteResponseMessage extends NibeHeatPumpBaseMessage {
 
     private boolean result = false;

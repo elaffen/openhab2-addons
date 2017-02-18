@@ -12,7 +12,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 
 /**
- * Class for parse data packets from Nibe heat pumps
+ * This class contains useful Nibe heat pump protocol utils.
  *
  * @author Pauli Anttila - Initial contribution
  */

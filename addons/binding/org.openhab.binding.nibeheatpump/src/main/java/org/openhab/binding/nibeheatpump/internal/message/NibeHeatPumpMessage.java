@@ -10,6 +10,12 @@ package org.openhab.binding.nibeheatpump.internal.message;
 
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 
+/**
+ * The {@link NibeHeatPumpMessage} define interface for Nibe messages.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public interface NibeHeatPumpMessage {
 
     /**

@@ -18,6 +18,13 @@ import org.openhab.binding.nibeheatpump.internal.message.NibeHeatPumpMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The {@link NibeHeatPumpBaseConnector} define abstract class for Nibe connectors. All connector implementations should
+ * extend this class.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public abstract class NibeHeatPumpBaseConnector implements NibeHeatPumpConnector {
     private static final Logger logger = LoggerFactory.getLogger(NibeHeatPumpBaseConnector.class);
 

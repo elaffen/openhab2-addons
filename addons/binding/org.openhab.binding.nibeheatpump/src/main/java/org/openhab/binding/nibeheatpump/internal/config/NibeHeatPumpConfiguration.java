@@ -9,11 +9,11 @@
 package org.openhab.binding.nibeheatpump.internal.config;
 
 /**
- * Configuration class for {@link RfxcomBinding} device.
+ * Configuration class for {@link NibeHeatPumpBinding} device.
+ *
  *
  * @author Pauli Anttila - Initial contribution
  */
-
 public class NibeHeatPumpConfiguration {
     public static final String HOST_NAME = "hostName";
     public static final String UDP_PORT = "port";

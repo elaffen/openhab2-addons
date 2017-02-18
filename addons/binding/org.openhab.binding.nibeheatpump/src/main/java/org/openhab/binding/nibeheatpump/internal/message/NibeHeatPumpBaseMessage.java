@@ -13,6 +13,13 @@ import javax.xml.bind.DatatypeConverter;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.protocol.NibeHeatPumpProtocol;
 
+/**
+ * The {@link NibeHeatPumpBaseMessage} define abstract class for Nibe messages. All message implementations should
+ * extend this class.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public abstract class NibeHeatPumpBaseMessage implements NibeHeatPumpMessage {
 
     public static MessageType getMessageType(byte messageType) {

@@ -8,6 +8,12 @@
  */
 package org.openhab.binding.nibeheatpump.internal.protocol;
 
+/**
+ * The {@link NibeHeatPumpProtocolState} define interface for Nibe protocol state machine.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public interface NibeHeatPumpProtocolState {
     /**
      * @return true to keep processing, false to read more data.

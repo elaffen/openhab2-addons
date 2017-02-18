@@ -9,7 +9,7 @@
 package org.openhab.binding.nibeheatpump.internal.models;
 
 /**
- * Class for
+ * Class for VariableInformation
  *
  * @author Pauli Anttila - Initial contribution
  */

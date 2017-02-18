@@ -13,7 +13,7 @@ import org.openhab.binding.nibeheatpump.internal.config.NibeHeatPumpConfiguratio
 import org.openhab.binding.nibeheatpump.internal.message.NibeHeatPumpMessage;
 
 /**
- * Base class for Nibe heat pump communication.
+ * Define interface to communicate Nibe heat pumps.
  *
  * @author Pauli Anttila - Initial contribution
  */

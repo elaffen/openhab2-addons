@@ -9,7 +9,8 @@
 package org.openhab.binding.nibeheatpump.internal.models;
 
 /**
- * Class for
+ * Class for different Nibe heat pump models.
+ * 
  *
  * @author Pauli Anttila - Initial contribution
  */

@@ -10,6 +10,12 @@ package org.openhab.binding.nibeheatpump.internal.protocol;
 
 import java.nio.ByteBuffer;
 
+/**
+ * The {@link NibeHeatPumpProtocolDefaultContext} implements default Nibe protocol context.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public class NibeHeatPumpProtocolDefaultContext implements NibeHeatPumpProtocolContext {
     NibeHeatPumpProtocolStates state = NibeHeatPumpProtocolStates.WAIT_START;
     ByteBuffer buffer = ByteBuffer.allocate(1000);

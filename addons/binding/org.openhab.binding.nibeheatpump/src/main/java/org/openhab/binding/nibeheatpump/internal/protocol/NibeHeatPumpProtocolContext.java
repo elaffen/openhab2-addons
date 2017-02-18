@@ -10,6 +10,12 @@ package org.openhab.binding.nibeheatpump.internal.protocol;
 
 import java.nio.ByteBuffer;
 
+/**
+ * The {@link NibeHeatPumpProtocolContext} define interface for Nibe communication protocol context.
+ *
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public interface NibeHeatPumpProtocolContext {
     void log(String format);
 

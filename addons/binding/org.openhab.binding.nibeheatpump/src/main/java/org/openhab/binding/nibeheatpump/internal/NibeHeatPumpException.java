@@ -9,7 +9,7 @@
 package org.openhab.binding.nibeheatpump.internal;
 
 /**
- * Exception for Nibe heat pump errors.
+ * The {@link NibeHeatPumpException} define Exceptions for Nibe heat pump errors.
  *
  * @author Pauli Anttila - Initial contribution
  */

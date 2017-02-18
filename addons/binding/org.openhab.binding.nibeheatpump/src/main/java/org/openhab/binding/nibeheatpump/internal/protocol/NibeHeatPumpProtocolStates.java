@@ -14,6 +14,11 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 
+/**
+ * The {@link NibeHeatPumpProtocolStates} implements Nibe heat pump protocol state machine states.
+ *
+ * @author Pauli Anttila - Initial contribution
+ */
 public enum NibeHeatPumpProtocolStates implements NibeHeatPumpProtocolState {
 
     WAIT_START {
