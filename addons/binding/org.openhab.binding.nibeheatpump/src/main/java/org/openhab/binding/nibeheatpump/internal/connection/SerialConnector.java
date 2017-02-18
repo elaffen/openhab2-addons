@@ -46,9 +46,9 @@ import gnu.io.UnsupportedCommOperationException;
  *
  * @author Pauli Anttila - Initial contribution
  */
-public class SerialConnector2 extends NibeHeatPumpBaseConnector {
+public class SerialConnector extends NibeHeatPumpBaseConnector {
 
-    private static final Logger logger = LoggerFactory.getLogger(SerialConnector2.class);
+    private static final Logger logger = LoggerFactory.getLogger(SerialConnector.class);
 
     private InputStream in = null;
     private OutputStream out = null;
@@ -59,7 +59,7 @@ public class SerialConnector2 extends NibeHeatPumpBaseConnector {
     private List<byte[]> readQueue = new ArrayList<byte[]>();
     private List<byte[]> writeQueue = new ArrayList<byte[]>();
 
-    public SerialConnector2() {
+    public SerialConnector() {
 
         logger.debug("Nibe heatpump Serial Port message listener created");
     }

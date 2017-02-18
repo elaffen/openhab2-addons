@@ -39,7 +39,7 @@ import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.config.NibeHeatPumpConfiguration;
 import org.openhab.binding.nibeheatpump.internal.connection.NibeHeatPumpConnector;
 import org.openhab.binding.nibeheatpump.internal.connection.NibeHeatPumpEventListener;
-import org.openhab.binding.nibeheatpump.internal.connection.SerialConnector2;
+import org.openhab.binding.nibeheatpump.internal.connection.SerialConnector;
 import org.openhab.binding.nibeheatpump.internal.connection.SimulatorConnector;
 import org.openhab.binding.nibeheatpump.internal.connection.UDPConnector;
 import org.openhab.binding.nibeheatpump.internal.message.ModbusDataReadOutMessage;
@@ -219,7 +219,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         if (thing.getThingTypeUID().equals(THING_TYPE_F1245_UDP)) {
             connector = new UDPConnector();
         } else if (thing.getThingTypeUID().equals(THING_TYPE_F1245_SERIAL)) {
-            connector = new SerialConnector2();
+            connector = new SerialConnector();
         } else if (thing.getThingTypeUID().equals(THING_TYPE_F1245_SIMULATOR)) {
             connector = new SimulatorConnector();
         }
