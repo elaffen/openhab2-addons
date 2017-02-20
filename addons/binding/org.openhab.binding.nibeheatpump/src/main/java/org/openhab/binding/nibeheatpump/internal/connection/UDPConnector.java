@@ -18,6 +18,8 @@ import java.util.Arrays;
 
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.config.NibeHeatPumpConfiguration;
+import org.openhab.binding.nibeheatpump.internal.message.ModbusReadRequestMessage;
+import org.openhab.binding.nibeheatpump.internal.message.ModbusWriteRequestMessage;
 import org.openhab.binding.nibeheatpump.internal.message.NibeHeatPumpMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,12 +102,24 @@ public class UDPConnector extends NibeHeatPumpBaseConnector {
 
             byte data[] = msg.decodeMessage();
 
-            // Create a packet
-            DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(conf.hostName),
-                    conf.port);
+            int port = -1;
 
-            sock.send(packet);
-            sock.close();
+            if (msg instanceof ModbusWriteRequestMessage) {
+                port = conf.port4writeCommands;
+            } else if (msg instanceof ModbusReadRequestMessage) {
+                port = conf.port4readCommands;
+            } else {
+                logger.trace("Ignore PDU: {}", msg.getClass().toString());
+            }
+
+            if (port > 0) {
+                // Create a packet
+                DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName(conf.hostName),
+                        port);
+
+                sock.send(packet);
+                sock.close();
+            }
 
         } catch (SocketException e) {
 

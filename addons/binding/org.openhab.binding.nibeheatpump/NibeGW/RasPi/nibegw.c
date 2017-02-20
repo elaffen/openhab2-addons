@@ -50,6 +50,7 @@
  *	4.6.2014    v1.10   More options.
  *	10.9.2014   v1.20   Bidirectional support.
  *  30.6.2015   v1.21   Some fixes.
+ *  20.2.2017	v1.22	Separated read and write token support.
  */
 
 #include <signal.h>
@@ -67,7 +68,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 
-#define VERSION	"1.20"
+#define VERSION	"1.22"
 
 #define FALSE	0
 #define TRUE	1
@@ -147,6 +148,23 @@ int writeDataToSerialPort(int fd, const unsigned char* const message, int msglen
 	}
 	
 	return retval;
+}
+
+int forwardUdpMsgToSerial(int udpfd, int serialfd)
+{
+	#define MAX_UDP_MSG_SIZE 50
+	unsigned char udp_packet[MAX_UDP_MSG_SIZE];
+	int udplen;
+	
+	if ((udplen = recv(udpfd, udp_packet, MAX_UDP_MSG_SIZE, 0)) > 0)
+	{
+		if (verbose > 1) printf("Received UDP message...relay message to serial port\n");
+		if (verbose > 2) printMessage( udp_packet, udplen);
+		
+		writeDataToSerialPort(serialfd, udp_packet, udplen);
+		return FALSE;
+	}
+	return TRUE;
 }
 
 int sendAck(int fd)
@@ -306,7 +324,8 @@ void printUsage(char* appname)
 	"\t-n                 Don't send acknowledge at all\n" \
 	"\t-o                 Send acknowledge to all addresses\n" \
 	"\t-t                 Test mode\n" \
-	"\t-l <port>          Local UDP port (default: 9999)\n" \
+	"\t-l <port>          Local UDP port for read commands (default: 9999)\n" \
+	"\t-w <port>          Local UDP port for write commands (default: 10000)\n" \
 	"\t-q                 Print data in log format\n" \
 	;
 	
@@ -318,7 +337,8 @@ int main(int argc, char **argv)
 	char *device = "/dev/ttySO";
 	char *remoteHost = "127.0.0.1";
 	int remotePort = 9999;
-	int localPort = 9999;
+	int localPort4readCmds = 9999;
+	int localPort4writeCmds = 10000;
 	unsigned char rs485addr = 0x20;
 	int sendall = FALSE;
 	int sendack = TRUE;
@@ -329,7 +349,7 @@ int main(int argc, char **argv)
 	int c;
 	opterr = 0;
 	
-	while ((c = getopt (argc, argv, "hvd:a:p:r:infotql:")) != -1)
+	while ((c = getopt (argc, argv, "hvd:a:p:r:infotql:w:")) != -1)
 	{
 		switch (c)
 		{
@@ -374,8 +394,12 @@ int main(int argc, char **argv)
 			break;
 
 		case 'l':
-			localPort = atoi(optarg);
+			localPort4readCmds = atoi(optarg);
 			break;
+
+        case 'w':
+            localPort4writeCmds = atoi(optarg);
+            break;
 
 		case 'r':
 			rs485addr = atoi(optarg);
@@ -407,7 +431,8 @@ int main(int argc, char **argv)
 		printf("Serial port:                       %s\n", device);
 		printf("Flow control:                      %s\n", hwflowctrl ? "HW" : "None");
 		printf("remote UDP address:                %s:%u\n", remoteHost, remotePort);
-		printf("server UDP address:                %u\n", localPort);
+		printf("server UDP address:                %u\n", localPort4readCmds);
+		printf("server UDP address for write cmds: %u\n", localPort4writeCmds);
 		printf("RS-485 address to listen:          0x%02X\n", rs485addr);
 		printf("Send all messages by UDP:          %s\n", sendall ? "TRUE" : "FALSE");
 		printf("Send acknowledge:                  %s\n", sendack ? "TRUE" : "FALSE");
@@ -419,6 +444,7 @@ int main(int argc, char **argv)
 	
 	int serialport_fd = -1;
 	int udp_fd = -1;
+	int udp4writeCmds_fd = -1;
 	
 	// Initialize destination address
 	struct sockaddr_in dest;
@@ -427,12 +453,19 @@ int main(int argc, char **argv)
 	dest.sin_addr.s_addr = inet_addr(remoteHost);
 	dest.sin_port = htons(remotePort);
 	
-	// Initialize server address
-	struct sockaddr_in server;
-	memset((char *)&server, 0, sizeof(server));
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = htonl(INADDR_ANY);
-	server.sin_port = htons(localPort);
+	// Initialize server address for read commands
+	struct sockaddr_in server4read;
+	memset((char *)&server4read, 0, sizeof(server4read));
+	server4read.sin_family = AF_INET;
+	server4read.sin_addr.s_addr = htonl(INADDR_ANY);
+	server4read.sin_port = htons(localPort4readCmds);
+
+    // Initialize server address for write commands
+    struct sockaddr_in server4write;
+    memset((char *)&server4write, 0, sizeof(server4write));
+    server4write.sin_family = AF_INET;
+    server4write.sin_addr.s_addr = htonl(INADDR_ANY);
+    server4write.sin_port = htons(localPort4writeCmds);
 	
 	int maxdatalen = 200;
 	
@@ -481,7 +514,7 @@ int main(int argc, char **argv)
 			
 			if (udp_fd < 0)
 			{
-				fprintf(stderr, "Failed to open UDP socket: %s\n", strerror(errno));
+				fprintf(stderr, "Failed to open UDP socket for read commands: %s\n", strerror(errno));
 			}
 			
 			if (verbose) printf("Initialize UDP server\n");
@@ -491,12 +524,35 @@ int main(int argc, char **argv)
     		fcntl(udp_fd, F_SETFL, flags | O_NONBLOCK);
     
 			//bind socket to port
-			if( bind(udp_fd, (struct sockaddr*)&server, sizeof(server) ) == -1)
+			if( bind(udp_fd, (struct sockaddr*)&server4read, sizeof(server4read) ) == -1)
 			{
-        		fprintf(stderr, "Failed to bind UDP port: %s\n", strerror(errno));
+        		fprintf(stderr, "Failed to bind UDP port for read commands: %s\n", strerror(errno));
 			}
 		}
 		
+		if ( udp4writeCmds_fd < 0 )
+        {
+            // Open UDP socket
+            udp4writeCmds_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+            
+            if (udp4writeCmds_fd < 0)
+            {
+                fprintf(stderr, "Failed to open UDP socket for write commands: %s\n", strerror(errno));
+            }
+            
+            if (verbose) printf("Initialize UDP server\n");
+            
+            // Set non blocking flag to UDP socket
+            int flags = fcntl(udp4writeCmds_fd, F_GETFL, 0);
+            fcntl(udp4writeCmds_fd, F_SETFL, flags | O_NONBLOCK);
+    
+            //bind socket to port
+            if( bind(udp4writeCmds_fd, (struct sockaddr*)&server4write, sizeof(server4write) ) == -1)
+            {
+                fprintf(stderr, "Failed to bind UDP port for write commands: %s\n", strerror(errno));
+            }
+        }
+        
 		if (testmode || serialport_fd >= 0)
 		{
 			char timestamp[80];
@@ -527,11 +583,11 @@ int main(int argc, char **argv)
 						index = 0;
 					}
 					
-					
 					if (startfound)
 					{
 						if ((index+1) >= maxdatalen)
 						{
+							// too long message, try to find new start char
 							startfound = FALSE;
 						}
 						else
@@ -562,38 +618,31 @@ int main(int argc, char **argv)
 									
 									if (message[2] == rs485addr || ackall)
 									{
+										// send ack to nibe or read/write messages if token received
+										
+										int nothingToSend = TRUE;
+										
 										if (message[3] == 0x69 && message[4] == 0x00)
 										{
 											if (verbose > 1) printf("Read token received\n");
-											#define MAX_UDP_MSG_SIZE 50
-											unsigned char udp_packet[MAX_UDP_MSG_SIZE];
-											int udplen;
-											
-											if ((udplen = recv(udp_fd, udp_packet, MAX_UDP_MSG_SIZE, 0)) > 0)
-											{
-												if (verbose > 1) printf("Received UDP message...relay message to serial port\n");
-												if (verbose > 2) printMessage( udp_packet, len);
-												
-												writeDataToSerialPort(serialport_fd, udp_packet, len);
-											}
-											else
-											{
-												if (verbose > 1) printf("Nothing to send\n");
-												if (sendack) sendAck(serialport_fd);
-											}
+											nothingToSend = forwardUdpMsgToSerial(udp_fd, serialport_fd);
 										}
 										else if (message[3] == 0x6b && message[4] == 0x00) {
-										  if (verbose > 1) printf("Write token received\n");
+										  	if (verbose > 1) printf("Write token received\n");
+										  	nothingToSend = forwardUdpMsgToSerial(udp4writeCmds_fd, serialport_fd);
 										}
-										else
+										
+										if (nothingToSend)
 										{
+											if (verbose > 1) printf("Nothing to send...");
 											if (sendack) sendAck(serialport_fd);
 										}
 									}
 									
-									// send UDP packet if message is to MODBUS40 module
 									if (message[2] == rs485addr || sendall)
 									{
+										// send message to remote
+										
 										if (verbose > 1) printf("Send UDP data to %s:%u\n", remoteHost, remotePort);
 										if (verbose > 2) printMessage( message, msglen);
 									
@@ -606,11 +655,9 @@ int main(int argc, char **argv)
 									// Wait new message
 									startfound = FALSE;
 									break;
-							}
+							}	
 						}
-						
 					}
-					
 				}
 			}
 			
@@ -639,6 +686,7 @@ int main(int argc, char **argv)
 	
 	close(serialport_fd);
 	close(udp_fd);
+	close(udp4writeCmds_fd);
 	
 	return 0;
 }

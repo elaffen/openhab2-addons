@@ -15,18 +15,10 @@ package org.openhab.binding.nibeheatpump.internal.config;
  * @author Pauli Anttila - Initial contribution
  */
 public class NibeHeatPumpConfiguration {
-    public static final String HOST_NAME = "hostName";
-    public static final String UDP_PORT = "port";
-    public static final String SERIAL_PORT = "serialPort";
-    public static final String REFRESH_INTERVAL = "refreshInterval";
-    public static final String ENABLE_READ_COMMANDS = "enableReadCommands";
-    public static final String ENABLE_WRITE_COMMANDS = "enableWriteCommands";
-    public static final String ENABLE_ACK_MODBUS40 = "sendAckToMODBUS40";
-    public static final String ENABLE_ACK_RMU40 = "sendAckToRMU40";
-    public static final String ENABLE_ACK_SM40 = "sendAckToSM40";
-
     public String hostName;
     public int port;
+    public int port4readCommands;
+    public int port4writeCommands;
     public String serialPort;
     public int refreshInterval;
     public boolean enableReadCommands;
@@ -41,6 +33,8 @@ public class NibeHeatPumpConfiguration {
 
         str += "hostName = " + hostName;
         str += ", port = " + port;
+        str += ", port4readCommands = " + port4readCommands;
+        str += ", port4writeCommands = " + port4writeCommands;
         str += ", serialPort = " + serialPort;
         str += ", refreshInterval = " + refreshInterval;
         str += ", enableReadCommands = " + enableReadCommands;

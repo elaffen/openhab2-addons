@@ -21,8 +21,18 @@
 			<parameter name="port" type="integer">
 				<label>UDP port</label>
 				<description>UDP port to listening data packets from the pump.</description>
-				<default>9998</default>
+				<default>9999</default>
 			</parameter>
+            <parameter name="port4readCommands" type="integer">
+                <label>UDP port for read commands</label>
+                <description>UDP port to send read commands.</description>
+                <default>9999</default>
+            </parameter>
+            <parameter name="port4writeCommands" type="integer">
+                <label>UDP port for write commands</label>
+                <description>UDP port to send write commands.</description>
+                <default>10000</default>
+            </parameter>
 			<parameter name="refreshInterval" type="integer">
 				<label>Refresh Interval</label>
 				<description>States how often a refresh shall occur in seconds.</description>
