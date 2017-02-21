@@ -147,7 +147,7 @@ public class UDPConnector extends NibeHeatPumpBaseConnector {
         public void run() {
 
             logger.debug("Data listener started");
-            while (interrupted) {
+            while (!interrupted) {
 
                 final int PACKETSIZE = 255;
 

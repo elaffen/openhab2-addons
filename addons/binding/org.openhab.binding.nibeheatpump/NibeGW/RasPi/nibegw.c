@@ -324,8 +324,8 @@ void printUsage(char* appname)
 	"\t-n                 Don't send acknowledge at all\n" \
 	"\t-o                 Send acknowledge to all addresses\n" \
 	"\t-t                 Test mode\n" \
-	"\t-l <port>          Local UDP port for read commands (default: 9999)\n" \
-	"\t-w <port>          Local UDP port for write commands (default: 10000)\n" \
+	"\t-l <port>          Local UDP port for read commands (default: 10000)\n" \
+	"\t-w <port>          Local UDP port for write commands (default: 10001)\n" \
 	"\t-q                 Print data in log format\n" \
 	;
 	
@@ -337,8 +337,8 @@ int main(int argc, char **argv)
 	char *device = "/dev/ttySO";
 	char *remoteHost = "127.0.0.1";
 	int remotePort = 9999;
-	int localPort4readCmds = 9999;
-	int localPort4writeCmds = 10000;
+	int localPort4readCmds = 10000;
+	int localPort4writeCmds = 10001;
 	unsigned char rs485addr = 0x20;
 	int sendall = FALSE;
 	int sendack = TRUE;
@@ -431,7 +431,7 @@ int main(int argc, char **argv)
 		printf("Serial port:                       %s\n", device);
 		printf("Flow control:                      %s\n", hwflowctrl ? "HW" : "None");
 		printf("remote UDP address:                %s:%u\n", remoteHost, remotePort);
-		printf("server UDP address:                %u\n", localPort4readCmds);
+		printf("server UDP address for read cmds:  %u\n", localPort4readCmds);
 		printf("server UDP address for write cmds: %u\n", localPort4writeCmds);
 		printf("RS-485 address to listen:          0x%02X\n", rs485addr);
 		printf("Send all messages by UDP:          %s\n", sendall ? "TRUE" : "FALSE");
