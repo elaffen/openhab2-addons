@@ -40,14 +40,18 @@
 			</parameter>
 			<parameter name="enableReadCommands" type="boolean">
                 <label>Enable read commands</label>
-                <description>Enable read commands to read additional variable from Nibe Heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk!</description>
+                <description>Enable read commands to read additional variable from Nibe heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk!</description>
                 <default>false</default>
             </parameter>
-			
 			<parameter name="enableWriteCommands" type="boolean">
                 <label>Enable write commands</label>
-                <description>Enable write commands to change Nibe Heat pump settings. This is experimental feature, use it at your own risk!</description>
+                <description>Enable write commands to change Nibe heat pump settings. This is experimental feature, use it at your own risk!</description>
                 <default>false</default>
+            </parameter>
+            <parameter name="enableCoilsForWriteCommands" type="text">
+                <label>Coil address list for write commands</label>
+                <description>Comma separated list of coil addresses, which are allowed to write to Nibe heat pump. E.g. 44266, 47004</description>
+                <default></default>
             </parameter>
 		</config-description>
 		
@@ -74,12 +78,12 @@
 			</parameter>
             <parameter name="enableReadCommands" type="boolean">
                 <label>Enable read commands</label>
-                <description>Enable read commands to read additional variable from Nibe Heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk!</description>
+                <description>Enable read commands to read additional variable from Nibe heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk!</description>
                 <default>false</default>
             </parameter>
 			<parameter name="enableWriteCommands" type="boolean">
                 <label>Enable write commands</label>
-                <description>Enable write commands to change Nibe Heat pump settings. This is experimental feature, use it at your own risk!</description>
+                <description>Enable write commands to change Nibe heat pump settings. This is experimental feature, use it at your own risk!</description>
                 <default>false</default>
             </parameter>
             <parameter name="sendAckToMODBUS40" type="boolean">
@@ -95,10 +99,9 @@
             <parameter name="sendAckToSMS40" type="boolean">
                 <label>Enable acknowledges to SMS40 messages</label>
                 <description>Binding emulates SMS40 device and send protocol acknowledges to heat pump.</description>
-                <default>false</default>
+                <default></default>
             </parameter>
 		</config-description>
-		
 	</thing-type>
 
 	<thing-type id="f1x45-simulator">
@@ -118,15 +121,19 @@
 			</parameter>
             <parameter name="enableReadCommands" type="boolean">
                 <label>Enable read commands</label>
-                <description>Enable read commands to read additional variable from Nibe Heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk!</description>
+                <description>Enable read commands to read additional variable from Nibe heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk!</description>
                 <default>false</default>
             </parameter>
 			<parameter name="enableWriteCommands" type="boolean">
                 <label>Enable write commands</label>
-                <description>Enable write commands to change Nibe Heat pump settings. This is experimental feature, use it at your own risk!</description>
+                <description>Enable write commands to change Nibe heat pump settings. This is experimental feature, use it at your own risk!</description>
                 <default>false</default>
             </parameter>
+            <parameter name="enableCoilsForWriteCommands" type="text">
+                <label>Coil address list for write commands</label>
+                <description>Comma separated list of coil addresses, which are allowed to write to Nibe heat pump. E.g. 44266, 47004</description>
+                <default></default>
+            </parameter>
 		</config-description>
-		
 	</thing-type>
 </thing:thing-descriptions>

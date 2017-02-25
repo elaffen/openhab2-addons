@@ -15,6 +15,7 @@ import org.eclipse.smarthome.core.thing.ThingTypeUID;
 import org.eclipse.smarthome.core.thing.binding.BaseThingHandlerFactory;
 import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.openhab.binding.nibeheatpump.handler.NibeHeatPumpHandler;
+import org.openhab.binding.nibeheatpump.internal.models.PumpModel;
 
 /**
  * The {@link NibeHeatPumpHandlerFactory} is responsible for creating things and
@@ -36,9 +37,21 @@ public class NibeHeatPumpHandlerFactory extends BaseThingHandlerFactory {
 
         if (thingTypeUID.equals(THING_TYPE_F1X45_UDP) || thingTypeUID.equals(THING_TYPE_F1X45_SERIAL)
                 || thingTypeUID.equals(THING_TYPE_F1X45_SIMULATOR)) {
-            return new NibeHeatPumpHandler(thing);
+            return new NibeHeatPumpHandler(thing, parsePumpModel(thing));
         }
 
         return null;
+    }
+
+    private PumpModel parsePumpModel(Thing thing) {
+        PumpModel pumpModel;
+        try {
+            String[] pumpModelStrings = thing.getThingTypeUID().getId().toString().split("-");
+            pumpModel = PumpModel.getPumpModel(pumpModelStrings[0]);
+        } catch (IllegalArgumentException e) {
+            String description = String.format("Illegal pump model '%s'", thing.getThingTypeUID().toString());
+            throw new IllegalArgumentException(description);
+        }
+        return pumpModel;
     }
 }

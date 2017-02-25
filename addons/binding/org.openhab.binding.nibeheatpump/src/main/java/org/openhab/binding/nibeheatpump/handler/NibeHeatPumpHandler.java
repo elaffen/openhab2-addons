@@ -8,8 +8,6 @@
  */
 package org.openhab.binding.nibeheatpump.handler;
 
-import static org.openhab.binding.nibeheatpump.NibeHeatPumpBindingConstants.*;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -37,11 +35,9 @@ import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpCommandResult;
 import org.openhab.binding.nibeheatpump.internal.NibeHeatPumpException;
 import org.openhab.binding.nibeheatpump.internal.config.NibeHeatPumpConfiguration;
+import org.openhab.binding.nibeheatpump.internal.connection.ConnectorFactory;
 import org.openhab.binding.nibeheatpump.internal.connection.NibeHeatPumpConnector;
 import org.openhab.binding.nibeheatpump.internal.connection.NibeHeatPumpEventListener;
-import org.openhab.binding.nibeheatpump.internal.connection.SerialConnector;
-import org.openhab.binding.nibeheatpump.internal.connection.SimulatorConnector;
-import org.openhab.binding.nibeheatpump.internal.connection.UDPConnector;
 import org.openhab.binding.nibeheatpump.internal.message.ModbusDataReadOutMessage;
 import org.openhab.binding.nibeheatpump.internal.message.ModbusReadRequestMessage;
 import org.openhab.binding.nibeheatpump.internal.message.ModbusReadResponseMessage;
@@ -66,7 +62,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
 
     private Logger logger = LoggerFactory.getLogger(NibeHeatPumpHandler.class);
 
-    private PumpModel pumpModel = PumpModel.F1X45;
+    private PumpModel pumpModel;
     private NibeHeatPumpConfiguration configuration;
 
     private NibeHeatPumpConnector connector = null;
@@ -80,6 +76,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
     private ScheduledFuture<?> connectorTask;
     private ScheduledFuture<?> pollingJob;
     private List<Integer> itemsToPoll = new ArrayList<Integer>();
+    private List<Integer> itemsToEnableWrite = new ArrayList<Integer>();
 
     private Map<Integer, CacheObject> stateMap = Collections.synchronizedMap(new HashMap<Integer, CacheObject>());
 
@@ -93,15 +90,16 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         }
     }
 
-    public NibeHeatPumpHandler(Thing thing) {
+    public NibeHeatPumpHandler(Thing thing, PumpModel pumpModel) {
         super(thing);
+        this.pumpModel = pumpModel;
     }
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
         logger.debug("Received channel: {}, command: {}", channelUID, command);
 
-        int coilAddress = parseCoildAddressFromChannelUID(channelUID);
+        int coilAddress = parseCoilAddressFromChannelUID(channelUID);
 
         if (command.equals(RefreshType.REFRESH)) {
             logger.debug("Clearing cache value for channel '{}' to refresh channel data", channelUID);
@@ -110,7 +108,12 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         }
 
         if (configuration.enableWriteCommands == false) {
-            logger.debug("All write commands denied, ignoring command!");
+            logger.info("All write commands denied, ignoring command!");
+            return;
+        }
+
+        if (itemsToEnableWrite.contains(coilAddress) == false) {
+            logger.info("Write commands to coil '{}' not allowed, ignoring command!", coilAddress);
             return;
         }
 
@@ -147,7 +150,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                     logger.error("Message sending to heat pump failed, sending interrupted");
                 } catch (NibeHeatPumpException e) {
                     logger.error("Message sending to heat pump failed, exception {}", e.getMessage());
-                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
+                    updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
                 } catch (ExecutionException e) {
                     logger.error("Message sending to heat pump failed, exception {}", e.getMessage());
                 } finally {
@@ -173,7 +176,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         logger.debug("channelLinked: {}", channelUID);
 
         // Add channel to polling loop
-        int coilAddress = parseCoildAddressFromChannelUID(channelUID);
+        int coilAddress = parseCoilAddressFromChannelUID(channelUID);
         synchronized (itemsToPoll) {
             itemsToPoll.add(coilAddress);
         }
@@ -185,13 +188,13 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         logger.debug("channelUnlinked: {}", channelUID);
 
         // remove channel from polling loop
-        int coilAddress = parseCoildAddressFromChannelUID(channelUID);
+        int coilAddress = parseCoilAddressFromChannelUID(channelUID);
         synchronized (itemsToPoll) {
             itemsToPoll.remove(coilAddress);
         }
     }
 
-    private int parseCoildAddressFromChannelUID(ChannelUID channelUID) {
+    private int parseCoilAddressFromChannelUID(ChannelUID channelUID) {
         if (channelUID.getId().contains("#")) {
             String[] parts = channelUID.getId().split("#");
             return Integer.parseInt(parts[parts.length - 1]);
@@ -210,18 +213,19 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         logger.info("Using configuration: {}", configuration.toString());
 
         try {
-            pumpModel = PumpModel.getPumpModel(thing.getThingTypeUID().getId().toString());
+            parseWriteEnabledItems();
         } catch (IllegalArgumentException e) {
-            logger.warn("Illegal pump model '{}', using default model '{}'", thing.getThingTypeUID().toString(),
-                    pumpModel);
+            String description = String.format("Illegal configuration, %s", e.getMessage());
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, description);
+            return;
         }
 
-        if (thing.getThingTypeUID().equals(THING_TYPE_F1X45_UDP)) {
-            connector = new UDPConnector();
-        } else if (thing.getThingTypeUID().equals(THING_TYPE_F1X45_SERIAL)) {
-            connector = new SerialConnector();
-        } else if (thing.getThingTypeUID().equals(THING_TYPE_F1X45_SIMULATOR)) {
-            connector = new SimulatorConnector();
+        try {
+            connector = ConnectorFactory.getConnector(thing.getThingTypeUID());
+        } catch (NibeHeatPumpException e) {
+            String description = String.format("Illegal configuration, %s", e.getMessage());
+            updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR, description);
+            return;
         }
 
         clearCache();
@@ -235,7 +239,6 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                         logger.debug("Restarting requested, restarting...");
                         reconnectionRequest = false;
                         closeConnection();
-                        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
                     }
 
                     logger.debug("Checking Nibe Heat pump connection, thing status = {}", thing.getStatus());
@@ -258,8 +261,8 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                     pollingJob = scheduler.scheduleAtFixedRate(pollingRunnable, 0, 1, TimeUnit.SECONDS);
                 }
             } catch (NibeHeatPumpException e) {
-                logger.error("Error occured when connecting to heat pump, exception {}", e.getMessage());
-                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
+                logger.debug("Error occured when connecting to heat pump, exception {}", e.getMessage());
+                updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, e.getMessage());
             }
         } else {
             logger.debug("Connection to heat pump already open");
@@ -368,6 +371,29 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         return value;
     }
 
+    private void parseWriteEnabledItems() throws IllegalArgumentException {
+        itemsToEnableWrite.clear();
+        String[] items = configuration.enableCoilsForWriteCommands.replace(" ", "").split(",");
+        if (items != null) {
+            for (int i = 0; i < items.length; i++) {
+                try {
+                    int coilAddress = Integer.parseInt(items[i]);
+                    VariableInformation variableInformation = VariableInformation.getVariableInfo(pumpModel,
+                            coilAddress);
+                    if (variableInformation == null) {
+                        String description = String.format("Uknown coil address %s", coilAddress);
+                        throw new IllegalArgumentException(description);
+                    }
+                    itemsToEnableWrite.add(coilAddress);
+                } catch (NumberFormatException e) {
+                    String description = String.format("Illegal coil address %s", items[i]);
+                    throw new IllegalArgumentException(description);
+                }
+            }
+        }
+        logger.debug("Enabled coil addresses for write commands: {}", itemsToEnableWrite);
+    }
+
     private State convertNibeValueToState(NibeDataType dataType, double value, String acceptedItemType) {
         State state = UnDefType.UNDEF;
 
@@ -445,7 +471,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
     public void errorOccured(String error) {
         logger.debug("Error '{}' occured, re-establish the connection", error);
         reconnectionRequest = true;
-        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
+        updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR, error);
     }
 
     private void handleReadResponseMessage(ModbusReadResponseMessage msg) {
