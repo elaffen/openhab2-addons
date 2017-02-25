@@ -6,7 +6,7 @@ function trim(s) { return rtrim(ltrim(s)); }
 
 BEGIN{
 	FS=";"
-	print "<channel-group-type id=\"sensors\">"
+	print "<channel-group-type id=\"Sensors\">"
 	print "    <label>Sensors</label>"
 	print "    <channels>"
 }

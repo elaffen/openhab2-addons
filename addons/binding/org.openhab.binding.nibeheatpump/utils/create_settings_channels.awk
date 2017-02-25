@@ -6,7 +6,7 @@ function trim(s) { return rtrim(ltrim(s)); }
 
 BEGIN{
 	FS=";"
-	print "<channel-group-type id=\"settings\">"
+	print "<channel-group-type id=\"Settings\">"
     print "    <label>Settings</label>"
     print "    <channels>"
 }
@@ -27,7 +27,7 @@ NR>5{
 	gsub("\"", "", info)
 	gsub("\"", "", unit)
 	
-    if (mode == "R")
+    if (mode != "R")
         printf("        <channel id=\"%s\" typeId=\"type-%s\"/>\n", id, id)
 }
 END{
