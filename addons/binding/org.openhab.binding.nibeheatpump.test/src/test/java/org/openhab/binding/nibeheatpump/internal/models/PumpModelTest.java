@@ -20,17 +20,10 @@ public class PumpModelTest {
     }
 
     @Test
-    public void TestF1245() {
-        final String pumpModelString = "F1245";
+    public void TestF1X45() {
+        final String pumpModelString = "F1X45";
         final PumpModel pumpModel = PumpModel.getPumpModel(pumpModelString);
-        assertEquals(PumpModel.F1245, pumpModel);
-    }
-
-    @Test
-    public void TestF1145() {
-        final String pumpModelString = "F1145";
-        final PumpModel pumpModel = PumpModel.getPumpModel(pumpModelString);
-        assertEquals(PumpModel.F1145, pumpModel);
+        assertEquals(PumpModel.F1X45, pumpModel);
     }
 
     @Test

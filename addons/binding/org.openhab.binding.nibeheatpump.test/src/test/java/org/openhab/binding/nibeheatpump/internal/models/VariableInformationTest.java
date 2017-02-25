@@ -20,9 +20,9 @@ public class VariableInformationTest {
     }
 
     @Test
-    public void TestF1245Variable() {
+    public void TestF1X45Variable() {
         final int coilAddress = 40004;
-        final VariableInformation variableInfo = VariableInformation.getVariableInfo(PumpModel.F1245, coilAddress);
+        final VariableInformation variableInfo = VariableInformation.getVariableInfo(PumpModel.F1X45, coilAddress);
         assertEquals(10, variableInfo.factor);
         assertEquals("BT1 Outdoor temp", variableInfo.variable);
         assertEquals(VariableInformation.NibeDataType.S16, variableInfo.dataType);

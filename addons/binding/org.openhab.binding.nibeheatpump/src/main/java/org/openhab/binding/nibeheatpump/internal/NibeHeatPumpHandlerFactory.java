@@ -34,8 +34,8 @@ public class NibeHeatPumpHandlerFactory extends BaseThingHandlerFactory {
 
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
 
-        if (thingTypeUID.equals(THING_TYPE_F1245_UDP) || thingTypeUID.equals(THING_TYPE_F1245_SERIAL)
-                || thingTypeUID.equals(THING_TYPE_F1245_SIMULATOR)) {
+        if (thingTypeUID.equals(THING_TYPE_F1X45_UDP) || thingTypeUID.equals(THING_TYPE_F1X45_SERIAL)
+                || thingTypeUID.equals(THING_TYPE_F1X45_SIMULATOR)) {
             return new NibeHeatPumpHandler(thing);
         }
 

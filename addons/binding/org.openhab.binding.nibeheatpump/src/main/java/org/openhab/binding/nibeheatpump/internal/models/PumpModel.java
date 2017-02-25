@@ -10,13 +10,12 @@ package org.openhab.binding.nibeheatpump.internal.models;
 
 /**
  * Class for different Nibe heat pump models.
- * 
+ *
  *
  * @author Pauli Anttila - Initial contribution
  */
 public enum PumpModel {
-    F1145("F1145"),
-    F1245("F1245");
+    F1X45("F1X45");
 
     private final String pumpModel;
 

@@ -25,13 +25,13 @@ public class NibeHeatPumpBindingConstants {
     public static final String BINDING_ID = "nibeheatpump";
 
     // List of all Thing Type UIDs
-    public final static ThingTypeUID THING_TYPE_F1245_UDP = new ThingTypeUID(BINDING_ID, "f1245-udp");
-    public final static ThingTypeUID THING_TYPE_F1245_SERIAL = new ThingTypeUID(BINDING_ID, "f1245-serial");
-    public final static ThingTypeUID THING_TYPE_F1245_SIMULATOR = new ThingTypeUID(BINDING_ID, "f1245-simulator");
+    public final static ThingTypeUID THING_TYPE_F1X45_UDP = new ThingTypeUID(BINDING_ID, "f1x45-udp");
+    public final static ThingTypeUID THING_TYPE_F1X45_SERIAL = new ThingTypeUID(BINDING_ID, "f1x45-serial");
+    public final static ThingTypeUID THING_TYPE_F1X45_SIMULATOR = new ThingTypeUID(BINDING_ID, "f1x45-simulator");
 
     /**
      * Presents all supported thing types by RFXCOM binding.
      */
-    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = ImmutableSet.of(THING_TYPE_F1245_UDP,
-            THING_TYPE_F1245_SERIAL, THING_TYPE_F1245_SIMULATOR);
+    public final static Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = ImmutableSet.of(THING_TYPE_F1X45_UDP,
+            THING_TYPE_F1X45_SERIAL, THING_TYPE_F1X45_SIMULATOR);
 }

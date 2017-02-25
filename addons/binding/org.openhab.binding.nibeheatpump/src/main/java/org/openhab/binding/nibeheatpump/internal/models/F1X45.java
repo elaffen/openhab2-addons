@@ -24,7 +24,7 @@ import org.openhab.binding.nibeheatpump.internal.models.VariableInformation.Type
 public class F1X45 {
 
     @SuppressWarnings("serial")
-    private static final Map<Integer, VariableInformation> VARIABLE_INFO_F1145_F1245 = Collections
+    private static final Map<Integer, VariableInformation> VARIABLE_INFO_F1X45 = Collections
             .unmodifiableMap(new HashMap<Integer, VariableInformation>() {
                 {
                     // @formatter:off
@@ -764,6 +764,6 @@ public class F1X45 {
             });
 
     public static VariableInformation getVariableInfo(int key) {
-        return VARIABLE_INFO_F1145_F1245.get(key);
+        return VARIABLE_INFO_F1X45.get(key);
     }
 }

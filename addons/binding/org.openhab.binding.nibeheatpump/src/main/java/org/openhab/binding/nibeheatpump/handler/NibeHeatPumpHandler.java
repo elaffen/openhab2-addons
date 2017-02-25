@@ -66,7 +66,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
 
     private Logger logger = LoggerFactory.getLogger(NibeHeatPumpHandler.class);
 
-    private PumpModel pumpModel = PumpModel.F1245;
+    private PumpModel pumpModel = PumpModel.F1X45;
     private NibeHeatPumpConfiguration configuration;
 
     private NibeHeatPumpConnector connector = null;
@@ -216,11 +216,11 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                     pumpModel);
         }
 
-        if (thing.getThingTypeUID().equals(THING_TYPE_F1245_UDP)) {
+        if (thing.getThingTypeUID().equals(THING_TYPE_F1X45_UDP)) {
             connector = new UDPConnector();
-        } else if (thing.getThingTypeUID().equals(THING_TYPE_F1245_SERIAL)) {
+        } else if (thing.getThingTypeUID().equals(THING_TYPE_F1X45_SERIAL)) {
             connector = new SerialConnector();
-        } else if (thing.getThingTypeUID().equals(THING_TYPE_F1245_SIMULATOR)) {
+        } else if (thing.getThingTypeUID().equals(THING_TYPE_F1X45_SIMULATOR)) {
             connector = new SimulatorConnector();
         }
 

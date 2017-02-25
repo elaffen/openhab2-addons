@@ -46,9 +46,7 @@ public class VariableInformation {
 
     public static VariableInformation getVariableInfo(PumpModel model, int key) {
         switch (model) {
-            case F1145:
-                return F1X45.getVariableInfo(key);
-            case F1245:
+            case F1X45:
                 return F1X45.getVariableInfo(key);
             default:
                 return null;
