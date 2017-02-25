@@ -322,14 +322,19 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                         // it's time to refresh data
                         logger.debug("Time to refresh variable '{}' data", item);
 
-                        ModbusReadRequestMessage msg = new ModbusReadRequestMessage.MessageBuilder().coilAddress(item)
-                                .build();
+                        ModbusReadRequestMessage request = new ModbusReadRequestMessage.MessageBuilder()
+                                .coilAddress(item).build();
 
                         try {
-                            readResult = sendMessageToNibe(msg);
+                            readResult = sendMessageToNibe(request);
                             ModbusReadResponseMessage result = (ModbusReadResponseMessage) readResult.get(timeout,
                                     TimeUnit.MILLISECONDS);
                             if (result != null) {
+                                if (request.getCoilAddress() != result.getCoilAddress()) {
+                                    logger.debug("Data for wrong coil address '{}' received, expected '{}'",
+                                            result.getCoilAddress(), request.getCoilAddress());
+                                }
+                                // update variable anyway
                                 handleVariableUpdate(pumpModel, result.getValueAsModbusValue());
                             }
                         } catch (TimeoutException e) {
