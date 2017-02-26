@@ -17,8 +17,8 @@ package org.openhab.binding.nibeheatpump.internal.config;
 public class NibeHeatPumpConfiguration {
     public String hostName;
     public int port;
-    public int port4readCommands;
-    public int port4writeCommands;
+    public int readCommandsPort;
+    public int writeCommandsPort;
     public String serialPort;
     public int refreshInterval;
     public boolean enableReadCommands;
@@ -34,8 +34,8 @@ public class NibeHeatPumpConfiguration {
 
         str += "hostName = " + hostName;
         str += ", port = " + port;
-        str += ", port4readCommands = " + port4readCommands;
-        str += ", port4writeCommands = " + port4writeCommands;
+        str += ", port4readCommands = " + readCommandsPort;
+        str += ", port4writeCommands = " + writeCommandsPort;
         str += ", serialPort = " + serialPort;
         str += ", refreshInterval = " + refreshInterval;
         str += ", enableReadCommands = " + enableReadCommands;

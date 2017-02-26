@@ -105,9 +105,9 @@ public class UDPConnector extends NibeHeatPumpBaseConnector {
             int port = -1;
 
             if (msg instanceof ModbusWriteRequestMessage) {
-                port = conf.port4writeCommands;
+                port = conf.writeCommandsPort;
             } else if (msg instanceof ModbusReadRequestMessage) {
-                port = conf.port4readCommands;
+                port = conf.readCommandsPort;
             } else {
                 logger.trace("Ignore PDU: {}", msg.getClass().toString());
             }

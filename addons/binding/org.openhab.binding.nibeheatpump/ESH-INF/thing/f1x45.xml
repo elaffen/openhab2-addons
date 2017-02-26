@@ -16,21 +16,21 @@
 		<config-description>
 			<parameter name="hostName" type="text" required="true">
 				<label>Host name</label>
-				<description>Network address of the Nibe heat pump.</description>
+				<description>Network address of the NibeGW.</description>
 			</parameter>
 			<parameter name="port" type="integer">
 				<label>UDP port</label>
-				<description>UDP port to listening data packets from the pump.</description>
+				<description>UDP port to listening data packets from the NibeGW.</description>
 				<default>9999</default>
 			</parameter>
-            <parameter name="port4readCommands" type="integer">
+            <parameter name="readCommandsPort" type="integer">
                 <label>UDP port for read commands</label>
-                <description>UDP port to send read commands.</description>
+                <description>UDP port to send read commands to the NibeGW.</description>
                 <default>9999</default>
             </parameter>
-            <parameter name="port4writeCommands" type="integer">
+            <parameter name="writeCommandsPort" type="integer">
                 <label>UDP port for write commands</label>
-                <description>UDP port to send write commands.</description>
+                <description>UDP port to send write commands to the NibeGW.</description>
                 <default>10000</default>
             </parameter>
 			<parameter name="refreshInterval" type="integer">
@@ -86,6 +86,11 @@
                 <description>Enable write commands to change Nibe heat pump settings. This is experimental feature, use it at your own risk!</description>
                 <default>false</default>
             </parameter>
+            <parameter name="enableCoilsForWriteCommands" type="text">
+                <label>Coil address list for write commands</label>
+                <description>Comma separated list of coil addresses, which are allowed to write to Nibe heat pump. E.g. 44266, 47004</description>
+                <default></default>
+            </parameter>
             <parameter name="sendAckToMODBUS40" type="boolean">
                 <label>Enable acknowledges to MODBUS40 messages</label>
                 <description>Binding emulates MODBUS40 device and send protocol acknowledges to heat pump.</description>
@@ -99,7 +104,7 @@
             <parameter name="sendAckToSMS40" type="boolean">
                 <label>Enable acknowledges to SMS40 messages</label>
                 <description>Binding emulates SMS40 device and send protocol acknowledges to heat pump.</description>
-                <default></default>
+                <default>false</default>
             </parameter>
 		</config-description>
 	</thing-type>
