@@ -113,7 +113,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         }
 
         if (itemsToEnableWrite.contains(coilAddress) == false) {
-            logger.info("Write commands to coil '{}' not allowed, ignoring command!", coilAddress);
+            logger.info("Write commands to register '{}' not allowed, ignoring command!", coilAddress);
             return;
         }
 
@@ -121,7 +121,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
 
             VariableInformation variableInfo = VariableInformation.getVariableInfo(pumpModel, coilAddress);
 
-            logger.debug("Usig variable information to coil address {}: {}", coilAddress, variableInfo);
+            logger.debug("Usig variable information for register {}: {}", coilAddress, variableInfo);
 
             if (variableInfo != null && variableInfo.type == VariableInformation.Type.Setting) {
 
@@ -334,7 +334,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                                     TimeUnit.MILLISECONDS);
                             if (result != null) {
                                 if (request.getCoilAddress() != result.getCoilAddress()) {
-                                    logger.debug("Data for wrong coil address '{}' received, expected '{}'",
+                                    logger.debug("Data from wrong register '{}' received, expected '{}'",
                                             result.getCoilAddress(), request.getCoilAddress());
                                 }
                                 // update variable anyway
@@ -373,7 +373,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
 
     private void parseWriteEnabledItems() throws IllegalArgumentException {
         itemsToEnableWrite.clear();
-        String[] items = configuration.enableCoilsForWriteCommands.replace(" ", "").split(",");
+        String[] items = configuration.enableWriteCommandsToRegisters.replace(" ", "").split(",");
         if (items != null) {
             for (int i = 0; i < items.length; i++) {
                 try {
@@ -381,17 +381,17 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                     VariableInformation variableInformation = VariableInformation.getVariableInfo(pumpModel,
                             coilAddress);
                     if (variableInformation == null) {
-                        String description = String.format("Uknown coil address %s", coilAddress);
+                        String description = String.format("Uknown register %s", coilAddress);
                         throw new IllegalArgumentException(description);
                     }
                     itemsToEnableWrite.add(coilAddress);
                 } catch (NumberFormatException e) {
-                    String description = String.format("Illegal coil address %s", items[i]);
+                    String description = String.format("Illegal register %s", items[i]);
                     throw new IllegalArgumentException(description);
                 }
             }
         }
-        logger.debug("Enabled coil addresses for write commands: {}", itemsToEnableWrite);
+        logger.debug("Enabled registers for write commands: {}", itemsToEnableWrite);
     }
 
     private State convertNibeValueToState(NibeDataType dataType, double value, String acceptedItemType) {
@@ -503,7 +503,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         VariableInformation variableInfo = VariableInformation.getVariableInfo(pumpModel, coilAddress);
 
         if (variableInfo != null) {
-            logger.trace("Using variable information to coil address {}: {}", coilAddress, variableInfo);
+            logger.trace("Using variable information to register {}: {}", coilAddress, variableInfo);
 
             double val = (double) value.getValue() / (double) variableInfo.factor;
             logger.debug("{} = {}", coilAddress + ":" + variableInfo.variable, val);
@@ -524,7 +524,7 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
                 updateState(new ChannelUID(getThing().getUID(), channelId), state);
             }
         } else {
-            logger.debug("Unknown variable {}", coilAddress);
+            logger.debug("Unknown register {}", coilAddress);
         }
     }
 }

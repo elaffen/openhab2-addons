@@ -89,21 +89,21 @@ Thing examples:
 nibeheatpump:f1x45-udp:myPump [hostName="192.168.1.50", port=9999]
 ```
 ```
-nibeheatpump:f1x45-udp:myPump [hostName="192.168.1.50", port=9999, readCommandsPort=10000, writeCommandsPort=10001, refreshInterval=30, port4readCommands=true, enableWriteCommands=true, enableCoilsForWriteCommands="44266, 47004"]
+nibeheatpump:f1x45-udp:myPump [hostName="192.168.1.50", port=9999, readCommandsPort=10000, writeCommandsPort=10001, refreshInterval=30, port4readCommands=true, enableWriteCommands=true, enableRegistersForWriteCommands="44266, 47004"]
 ```
 
 All supported configuration parameters for UDP connection:
 
-| Property                     | Type    | Default | Required | Description |
-|------------------------------|---------|---------|----------|-------------|
-| hostName                     | String  |         | Yes      | Network address of the Nibe heat pump |
-| port                         | Integer | 9999    | No       | UDP port to listening data packets from the NibeGW |
-| readCommandsPort             | Integer | 9999    | No       | UDP port to send read commands to the NibeGW |
-| writeCommandsPort            | Integer | 10000   | No       | UDP port to send write commands to the NibeGW |
-| refreshInterval              | Integer | 60      | No       | States how often a refresh shall occur in seconds |
-| enableReadCommands           | Boolean | false   | No       | Enable read commands to read additional variable from Nibe heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk! |
-| enableWriteCommands          | Boolean | false   | No       | Enable write commands to change Nibe heat pump settings. This is experimental feature, use it at your own risk! |
-| enableCoilsForWriteCommands  | String  |         | No       | Comma separated list of coil addresses, which are allowed to write to Nibe heat pump. E.g. 44266, 47004 |
+| Property                        | Type    | Default | Required | Description |
+|---------------------------------|---------|---------|----------|-------------|
+| hostName                        | String  |         | Yes      | Network address of the Nibe heat pump |
+| port                            | Integer | 9999    | No       | UDP port to listening data packets from the NibeGW |
+| readCommandsPort                | Integer | 9999    | No       | UDP port to send read commands to the NibeGW |
+| writeCommandsPort               | Integer | 10000   | No       | UDP port to send write commands to the NibeGW |
+| refreshInterval                 | Integer | 60      | No       | States how often a refresh shall occur in seconds |
+| enableReadCommands              | Boolean | false   | No       | Enable read commands to read additional variable from Nibe heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk! |
+| enableWriteCommands             | Boolean | false   | No       | Enable write commands to change Nibe heat pump settings. This is experimental feature, use it at your own risk! |
+| enableRegistersForWriteCommands | String  |         | No       | Comma separated list of registers, which are allowed to write to Nibe heat pump. E.g. 44266, 47004 |
 
 
 ### Serial port connection
@@ -116,16 +116,16 @@ nibeheatpump:f1x45-serial:myPump [serialPort="/dev/ttyUSB0"]
 
 All supported configuration parameters for serial port connection:
 
-| Property                     | Type    | Default | Required | Description |
-|------------------------------|---------|---------|----------|-------------|
-| serialPort                   | String  |         | Yes      | Network address of the Nibe heat pump |
-| refreshInterval              | Integer | 60      | No       | States how often a refresh shall occur in seconds |
-| enableReadCommands           | Boolean | false   | No       | Enable read commands to read additional variable from Nibe heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk! |
-| enableWriteCommands          | Boolean | false   | No       | Enable write commands to change Nibe heat pump settings. This is experimental feature, use it at your own risk! |
-| enableCoilsForWriteCommands  | String  |         | No       | Comma separated list of coil addresses, which are allowed to write to Nibe heat pump. E.g. 44266, 47004 |
-| sendAckToMODBUS40            | Boolean | true    | No       | Binding emulates MODBUS40 device and send protocol acknowledges to heat pump |
-| sendAckToRMU40               | Boolean | false   | No       | Binding emulates RMU40 device and send protocol acknowledges to heat pump |
-| sendAckToSMS40               | Boolean | false   | No       | Binding emulates SMS40 device and send protocol acknowledges to heat pump |
+| Property                        | Type    | Default | Required | Description |
+|---------------------------------|---------|---------|----------|-------------|
+| serialPort                      | String  |         | Yes      | Network address of the Nibe heat pump |
+| refreshInterval                 | Integer | 60      | No       | States how often a refresh shall occur in seconds |
+| enableReadCommands              | Boolean | false   | No       | Enable read commands to read additional variable from Nibe heat pump which are not included to data readout messages. This is experimental feature, use it at your own risk! |
+| enableWriteCommands             | Boolean | false   | No       | Enable write commands to change Nibe heat pump settings. This is experimental feature, use it at your own risk! |
+| enableRegistersForWriteCommands | String  |         | No       | Comma separated list of registers, which are allowed to write to Nibe heat pump. E.g. 44266, 47004 |
+| sendAckToMODBUS40               | Boolean | true    | No       | Binding emulates MODBUS40 device and send protocol acknowledges to heat pump |
+| sendAckToRMU40                  | Boolean | false   | No       | Binding emulates RMU40 device and send protocol acknowledges to heat pump |
+| sendAckToSMS40                  | Boolean | false   | No       | Binding emulates SMS40 device and send protocol acknowledges to heat pump |
 
 
 ## Channels

@@ -26,7 +26,7 @@ public class NibeHeatPumpConfiguration {
     public boolean sendAckToMODBUS40;
     public boolean sendAckToRMU40;
     public boolean sendAckToSMS40;
-    public String enableCoilsForWriteCommands;
+    public String enableWriteCommandsToRegisters;
 
     @Override
     public String toString() {
@@ -43,7 +43,7 @@ public class NibeHeatPumpConfiguration {
         str += ", sendAckToMODBUS40 = " + sendAckToMODBUS40;
         str += ", sendAckToRMU40 = " + sendAckToRMU40;
         str += ", sendAckToSMS40 = " + sendAckToSMS40;
-        str += ", enableCoilsForWriteCommands = " + enableCoilsForWriteCommands;
+        str += ", enableCoilsForWriteCommands = " + enableWriteCommandsToRegisters;
 
         return str;
     }
