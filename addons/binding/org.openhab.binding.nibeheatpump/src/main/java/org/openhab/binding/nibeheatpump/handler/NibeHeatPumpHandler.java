@@ -108,12 +108,15 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
         }
 
         if (configuration.enableWriteCommands == false) {
-            logger.info("All write commands denied, ignoring command!");
+            logger.info(
+                    "All write commands denied, ignoring command! Change Nibe heat pump binding configuration if you want to enable write commands.");
             return;
         }
 
         if (itemsToEnableWrite.contains(coilAddress) == false) {
-            logger.info("Write commands to register '{}' not allowed, ignoring command!", coilAddress);
+            logger.info(
+                    "Write commands to register '{}' not allowed, ignoring command! Add this register to Nibe heat pump binding configuration if you want to enable write commands.",
+                    coilAddress);
             return;
         }
 
@@ -509,12 +512,11 @@ public class NibeHeatPumpHandler extends BaseThingHandler implements NibeHeatPum
             logger.debug("{} = {}", coilAddress + ":" + variableInfo.variable, val);
 
             CacheObject oldValue = stateMap.get(coilAddress);
+            stateMap.put(coilAddress, new CacheObject(System.currentTimeMillis() / 1000, val));
 
             if (oldValue != null && val == oldValue.value) {
                 logger.trace("Value haven't been changed, ignore update");
             } else {
-                stateMap.put(coilAddress, new CacheObject(System.currentTimeMillis() / 1000, val));
-
                 final String channelPrefix = (variableInfo.type == Type.Setting ? "setting#" : "sensor#");
                 final String channelId = channelPrefix + String.valueOf(coilAddress);
                 final String acceptedItemType = thing.getChannel(channelId).getAcceptedItemType();
