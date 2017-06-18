@@ -148,7 +148,7 @@ public class RemoteControllerService implements SamsungTvService {
 
     /**
      * Sends a command to Samsung TV device.
-     * 
+     *
      * @param key
      *            Button code to send
      */
@@ -173,7 +173,7 @@ public class RemoteControllerService implements SamsungTvService {
 
     /**
      * Sends a sequence of command to Samsung TV device.
-     * 
+     *
      * @param key
      *            Button code to send
      */
@@ -196,4 +196,8 @@ public class RemoteControllerService implements SamsungTvService {
         }
     }
 
+    @Override
+    public boolean testConnection() {
+        return false;
+    }
 }

@@ -42,6 +42,28 @@
 				<description>States how often a refresh shall occur in milliseconds.</description>
 				<default>1000</default>
 			</parameter>
+			
+			<parameter name="remoteControlReceiver" type="text">
+                <label>RemoteControlReceiver</label>
+                <description>RemoteControlReceiver UPnP UUID.</description>
+                <default></default>
+            </parameter>
+            <parameter name="mediaRenderer" type="text">
+                <label>MediaRenderer</label>
+                <description>MediaRenderer UPnP UUID.</description>
+                <default></default>
+            </parameter>
+            <parameter name="dialreceiver" type="text">
+                <label>DialReceiver</label>
+                <description>dialreceiver UPnP UUID.</description>
+                <default></default>
+            </parameter>
+            <parameter name="mainTVServer2" type="text">
+                <label>MainTVServer2</label>
+                <description>MainTVServer2 UPnP UUID.</description>
+                <default></default>
+            </parameter>
+            
 		</config-description>
 	</thing-type>
 

@@ -342,4 +342,14 @@ public class MediaRendererService implements UpnpIOParticipant, SamsungTvService
     public void onStatusChanged(boolean status) {
         logger.debug("onStatusChanged");
     }
+
+    @Override
+    public boolean testConnection() {
+        Map<String, String> result = service.invokeAction(this, "RenderingControl", "GetVolume",
+                SamsungTvUtils.buildHashMap("InstanceID", "0", "Channel", "Master"));
+        if (result.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
 }

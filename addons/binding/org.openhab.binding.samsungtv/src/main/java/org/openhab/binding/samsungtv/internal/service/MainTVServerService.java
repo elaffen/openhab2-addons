@@ -341,4 +341,13 @@ public class MainTVServerService implements UpnpIOParticipant, SamsungTvService 
     public void onStatusChanged(boolean status) {
         logger.debug("onStatusChanged: status={}", status);
     }
+
+    @Override
+    public boolean testConnection() {
+        Map<String, String> result = service.invokeAction(this, "MainTVAgent2", "GetCurrentMainTVChannel", null);
+        if (result.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
 }
