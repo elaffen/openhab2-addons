@@ -200,9 +200,11 @@ public class OnkyoConnection {
                 }
 
             } catch (UnknownHostException unknownHost) {
-                logger.error("You are trying to connect to an unknown host: {}", unknownHost.getMessage());
+                logger.debug("You are trying to connect to an unknown host: {}", unknownHost.getMessage());
+                sendConnectionErrorEvent();
             } catch (IOException ioException) {
-                logger.error("Can't connect: {}", ioException.getMessage());
+                logger.debug("Can't connect: {}", ioException.getMessage());
+                sendConnectionErrorEvent();
             }
         }
 
@@ -299,11 +301,11 @@ public class OnkyoConnection {
                     connectionAttempts = 0;
                 } catch (EiscpException e) {
 
-                    logger.error("Error occurred during message waiting: {}", e.getMessage());
+                    logger.debug("Error occurred during message waiting: {}", e.getMessage());
 
                 } catch (SocketTimeoutException e) {
 
-                    logger.error("No data received during supervision interval ({} sec)!", SOCKET_TIMEOUT);
+                    logger.debug("No data received during supervision interval ({} sec)!", SOCKET_TIMEOUT);
 
                     restartConnection = true;
 
@@ -343,7 +345,8 @@ public class OnkyoConnection {
                                 .value(EiscpCommand.POWER_QUERY.getValue()).build());
 
                     } catch (Exception ex) {
-                        logger.error("Reconnection invoking error: {}", ex.getMessage());
+                        logger.debug("Reconnection invoking error: {}", ex.getMessage());
+                        sendConnectionErrorEvent();
                     }
                 }
             }
